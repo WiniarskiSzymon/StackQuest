@@ -9,6 +9,6 @@ interface SearchService{
 
     @GET("/search")
     fun getQueryResults(
-        @Query("intitle") query :String,
+        @Query("intitle") query :String
     ): Single<SearchResponse>
 }

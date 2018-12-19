@@ -1,14 +1,15 @@
 package com.example.swierk.stackquest.model
 
-import com.google.gson.annotations.SerializedName
+
+import com.squareup.moshi.Json
 
 data class SearchResponse(
-    @SerializedName("has_more")
+    @Json(name = "has_more")
     val hasMore: Boolean,
-    @SerializedName("items")
+    @Json(name = "items")
     val items: List<Question>,
-    @SerializedName("quota_max")
+    @Json(name = "quota_max")
     val quotaMax: Int,
-    @SerializedName("quota_remaining")
+    @Json(name = "quota_remaining")
     val quotaRemaining: Int
 )

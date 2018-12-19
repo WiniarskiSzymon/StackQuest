@@ -1,20 +1,21 @@
 package com.example.swierk.stackquest.model
 
-import com.google.gson.annotations.SerializedName
+
+import com.squareup.moshi.Json
 
 data class Owner(
-    @SerializedName("accept_rate")
+    @Json(name = "accept_rate")
     val acceptRate: Int,
-    @SerializedName("display_name")
+    @Json(name = "display_name")
     val displayName: String,
-    @SerializedName("link")
+    @Json(name = "link")
     val link: String,
-    @SerializedName("profile_image")
+    @Json(name = "profile_image")
     val profileImage: String,
-    @SerializedName("reputation")
+    @Json(name = "reputation")
     val reputation: Int,
-    @SerializedName("user_id")
+    @Json(name = "user_id")
     val userId: Int,
-    @SerializedName("user_type")
+    @Json(name = "user_type")
     val userType: String
 )

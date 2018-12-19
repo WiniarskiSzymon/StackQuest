@@ -12,15 +12,15 @@
             android:layout_marginLeft="8dp" android:layout_marginStart="8dp"
             app:layout_constraintTop_toTopOf="@+id/avatar"/>
     <ImageView
-            android:layout_width="50"
-            android:layout_height="60" tools:srcCompat="@tools:sample/backgrounds/scenic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" tools:srcCompat="@tools:sample/backgrounds/scenic"
             android:id="@+id/avatar"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginLeft="8dp" android:layout_marginStart="8dp"
             app:layout_constraintTop_toBottomOf="@+id/imageView2" android:layout_marginTop="2dp"/>
     <ImageView
             android:layout_width="0dp"
-            android:layout_height="2" app:srcCompat="@color/colorPrimaryDark"
+            android:layout_height="2dp" app:srcCompat="@color/colorPrimaryDark"
             android:id="@+id/imageView2"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

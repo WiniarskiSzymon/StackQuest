@@ -6,20 +6,12 @@ import io.reactivex.Single
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.logging.Logger.getLogger
+import javax.inject.Inject
 
-class StackApi{
+class StackAPI @Inject constructor(private val retrofit: Retrofit){
 
-
-    private val gson = GsonBuilder()
-        .setLenient()
-        .create()
-
-    private val  retrofit = Retrofit.Builder()
-        .baseUrl("https://api.stackexchange.com/2.2")
-        .addConverterFactory(GsonConverterFactory.create(gson))
-        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-        .build()
 
     fun getQueryResults(query: String): Single<SearchResponse> {
         val searchService = retrofit.create(SearchService::class.java)
