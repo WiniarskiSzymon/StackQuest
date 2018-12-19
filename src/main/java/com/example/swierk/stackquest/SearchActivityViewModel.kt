@@ -32,7 +32,7 @@ class SearchActivityViewModel @Inject constructor(private val stackAPI: StackAPI
     }
 
 
-    }
+
     override fun onCleared() {
         super.onCleared()
         disposable.dispose()
