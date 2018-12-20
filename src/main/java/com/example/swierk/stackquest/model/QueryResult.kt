@@ -3,7 +3,7 @@ package com.example.swierk.stackquest.model
 
 import com.squareup.moshi.Json
 
-data class SearchResponse(
+data class QueryResult(
     @Json(name = "has_more")
     val hasMore: Boolean,
     @Json(name = "items")
