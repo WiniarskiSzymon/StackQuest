@@ -19,7 +19,7 @@ class AppModule() {
 
     @Singleton
     @Provides
-    fun provideApi() = StackAPI()
+    fun provideApi(retrofit : Retrofit) = StackAPI(retrofit)
 
     @Provides
     @Singleton

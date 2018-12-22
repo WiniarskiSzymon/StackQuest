@@ -7,6 +7,7 @@ import com.example.swierk.stackquest.api.StackAPI
 import com.example.swierk.stackquest.model.Response
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.android.schedulers.AndroidSchedulers
 import javax.inject.Inject
 
 class SearchActivityViewModel @Inject constructor(private val stackAPI: StackAPI) : ViewModel(){
