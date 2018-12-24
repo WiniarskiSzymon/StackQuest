@@ -5,6 +5,8 @@ import android.content.Context
 import com.example.swierk.stackquest.api.StackAPI
 import dagger.Module
 import dagger.Provides
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -23,10 +25,23 @@ class AppModule() {
 
     @Provides
     @Singleton
-    fun provideRetrofit() = Retrofit.Builder()
-        .baseUrl("https://api.stackexchange.com/2.2")
+    fun provideRetrofit(logger : OkHttpClient) = Retrofit.Builder()
+        .baseUrl("https://api.stackexchange.com/2.2/")
+        .client(logger)
         .addConverterFactory(MoshiConverterFactory.create())
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
         .build()
+
+
+    @Provides
+    @Singleton
+    fun provideLogger() : OkHttpClient {
+        val  logging = HttpLoggingInterceptor()
+        logging.level = HttpLoggingInterceptor.Level.BODY
+        val httpClient = OkHttpClient.Builder()
+        httpClient.addInterceptor(logging)
+        return httpClient.build()
+
+    }
 
 }

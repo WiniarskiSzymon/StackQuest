@@ -7,8 +7,9 @@ import retrofit2.http.Query
 
 interface SearchService{
 
-    @GET("/search")
+    @GET("search")
     fun getQueryResults(
-        @Query("intitle") query :String
+        @Query("intitle") query :String,
+        @Query("site") siteName :String ="stackoverflow"
     ): Single<QueryResult>
 }

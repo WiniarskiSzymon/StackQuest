@@ -7,6 +7,6 @@ import dagger.android.ContributesAndroidInjector
 @Module
 abstract class ActivitiesModule {
 
-    @ContributesAndroidInjector(modules = arrayOf(SearchActivity::class))
+    @ContributesAndroidInjector(modules = arrayOf(SearchActivityModule::class))
     internal abstract fun contributeSearchActivity(): SearchActivity
 }

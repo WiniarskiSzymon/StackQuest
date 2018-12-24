@@ -9,6 +9,10 @@ import dagger.Provides
 @Module
 abstract class SearchActivityModule{
 
-    @Provides
-    fun provideSearchActivityViewModelFactory(stackAPI : StackAPI) = SearchActivityViewModelFactory(stackAPI)
+    @Module
+    companion object {
+        @JvmStatic
+        @Provides
+        fun provideSearchActivityViewModelFactory(stackAPI: StackAPI) = SearchActivityViewModelFactory(stackAPI)
+    }
 }

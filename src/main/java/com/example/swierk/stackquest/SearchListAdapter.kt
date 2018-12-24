@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.swierk.stackquest.model.Question
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.question_item.view.*
 
 
