@@ -4,10 +4,12 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import com.example.swierk.stackquest.api.StackAPI
+import com.example.swierk.stackquest.model.QueryResult
 import com.example.swierk.stackquest.model.Response
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import rx.android.schedulers.AndroidSchedulers
+
 import javax.inject.Inject
 
 class SearchActivityViewModel @Inject constructor(private val stackAPI: StackAPI) : ViewModel(){
@@ -16,24 +18,26 @@ class SearchActivityViewModel @Inject constructor(private val stackAPI: StackAPI
     private lateinit var disposable: Disposable
 
 
-    private lateinit var searchResponse: MutableLiveData<Response>
+    var searchResponse: MutableLiveData<Response> = MutableLiveData()
+    private var cachedQueryResult : QueryResult? = null
 
-    fun searchQuery(query : String): LiveData<Response> {
-        if (!::searchResponse.isInitialized) {
-            searchResponse = MutableLiveData()
-        }
-        getQueryResults(query)
-        return searchResponse
-    }
 
-    private fun getQueryResults(query : String){
+     fun getQueryResults(query : String){
         disposable = stackAPI.getQueryResults(query)
             .subscribeOn(Schedulers.io())
-            //.observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe {searchResponse.postValue(Response.loading())  }
-            .doOnSuccess { searchResponse.postValue(Response.success(it)) }
-            .doOnError { searchResponse.postValue(Response.error()) }
-            .subscribe()
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe {searchResponse.value=(Response.loading())  }
+            .subscribe(
+                {
+                    searchResponse.value=(Response.success(it))
+                    cachedQueryResult = it
+                },
+                {
+                    searchResponse.value=(Response.error(it.message ))
+                    searchResponse.value=(Response.success(cachedQueryResult))
+                }
+
+            )
     }
 
 

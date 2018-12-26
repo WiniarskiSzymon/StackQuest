@@ -9,7 +9,7 @@ import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.question_item.view.*
 
 
-class SearchListAdapter(val items: List<Question>) : RecyclerView.Adapter<SearchListAdapter.ViewHolder>() {
+class SearchListAdapter(val items: List<Question>,private val clickListener: (Question) -> Unit) : RecyclerView.Adapter<SearchListAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
@@ -21,6 +21,7 @@ class SearchListAdapter(val items: List<Question>) : RecyclerView.Adapter<Search
         holder.answerCount.text = items[position].answerCount.toString()
         holder.title.text = items[position].title
         holder.userName.text = items[position].owner.displayName
+        holder.itemView.setOnClickListener{clickListener(items[position])}
 
     }
 
@@ -38,7 +39,5 @@ class SearchListAdapter(val items: List<Question>) : RecyclerView.Adapter<Search
         fun updateWithUrl(url: String) {
             Picasso.get().load(url).into(userAvatar)
         }
-
-
     }
 }

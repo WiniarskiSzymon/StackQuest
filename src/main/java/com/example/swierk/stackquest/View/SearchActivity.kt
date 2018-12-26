@@ -2,12 +2,15 @@ package com.example.swierk.stackquest.View
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
+import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.recyclerview.R.attr.layoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import com.example.swierk.stackquest.*
+import com.example.swierk.stackquest.model.QueryResult
 import com.example.swierk.stackquest.model.Question
 import com.example.swierk.stackquest.model.Response
 import com.jakewharton.rxbinding.widget.RxSearchView
@@ -24,13 +27,15 @@ class SearchActivity : AppCompatActivity() {
     @Inject
     lateinit var searchViewModelFactory: SearchActivityViewModelFactory
 
-    private val searchActivityViewModel by lazy{ ViewModelProviders.of(this, searchViewModelFactory)
-            .get(SearchActivityViewModel::class.java)}
+    private val searchActivityViewModel by lazy {
+        ViewModelProviders.of(this, searchViewModelFactory)
+            .get(SearchActivityViewModel::class.java)
+    }
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
-    private var questionList : MutableList<Question> = mutableListOf()
+    private var questionList: MutableList<Question> = mutableListOf()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,39 +43,78 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
+        swiperefresh.setOnRefreshListener {
+            if(search_query.query.isNotEmpty()) {
+                searchActivityViewModel.getQueryResults(search_query.query.toString())
+            }
+        }
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = SearchListAdapter(questionList)
-
+        viewAdapter = SearchListAdapter(questionList){question : Question ->  showQuestionDetails( question )}
         recyclerView = findViewById<RecyclerView>(R.id.search_list_recycler).apply {
             setHasFixedSize(true)
             layoutManager = viewManager
             adapter = viewAdapter
         }
-
-        initSearch()
+        observeSearchResponseLiveData()
+        initSearchBar()
     }
 
+    private fun showQuestionDetails(question : Question){
+        val uris = Uri.parse(question.link)
+        val intent = Intent(Intent.ACTION_VIEW, uris)
+        startActivity(intent)
+    }
 
-    private fun initSearch(){
+    private fun observeSearchResponseLiveData() {
+        searchActivityViewModel.searchResponse.observe(this, Observer<Response> {
+            when (it?.status) {
+                Response.Status.SUCCESS -> {
+                    updateAdapterWithData(it)
+                    swiperefresh.isRefreshing = false
+                }
+                Response.Status.LOADING ->swiperefresh.isRefreshing = true
+                Response.Status.ERROR -> {
+                    swiperefresh.isRefreshing = false
+                    updateAdapterWithData(it)
+                    it.errorMessage?.toast(this)
+                }
+            }
+        }
+        )
+    }
+
+    private fun updateAdapterWithData(response: Response){
+        if (response.data != null) {
+            questionList.clear()
+            questionList.addAll(response.data.items)
+            viewAdapter.notifyDataSetChanged()
+        }
+        }
+
+
+
+    private fun initSearchBar() {
         RxSearchView.queryTextChanges(search_query)
             .debounce(1, TimeUnit.SECONDS)
-            .filter { !it.isEmpty() }
-            .onBackpressureLatest()
+            .skip(1)
+            .filter { it.isNotEmpty() }
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe{
-                searchActivityViewModel.searchQuery(it.toString()).observe(this, Observer<Response>{
-                if (it?.status == Response.Status.SUCCESS){
-                        if (it.data != null) {
-                            questionList.removeAll { it !=null }
-                            questionList.addAll(it.data.items)
-                            viewAdapter.notifyDataSetChanged()
-                        }
-                    }
+            .distinctUntilChanged()
+            .subscribe {
+                searchActivityViewModel.getQueryResults(it.toString())
+            }
+        search_query.setOnSearchClickListener {
+            if(search_query.query.isNotEmpty()) {
+            searchActivityViewModel.getQueryResults(search_query.query.toString())
+        }}
 
-                }
-            )}
     }
+
+
 
 
 }
+
+
+
