@@ -1,7 +1,10 @@
 package com.example.swierk.stackquest.View
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
@@ -10,6 +13,7 @@ import android.support.v7.recyclerview.R.attr.layoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import com.example.swierk.stackquest.*
+import com.example.swierk.stackquest.background.AlarmReceiver
 import com.example.swierk.stackquest.model.QueryResult
 import com.example.swierk.stackquest.model.Question
 import com.example.swierk.stackquest.model.Response
@@ -42,6 +46,7 @@ class SearchActivity : AppCompatActivity() {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
+        cancelBackroundQuery()
 
         swiperefresh.setOnRefreshListener {
             if(search_query.query.isNotEmpty()) {
@@ -111,6 +116,29 @@ class SearchActivity : AppCompatActivity() {
 
     }
 
+     override fun onDestroy() {
+        super.onDestroy()
+         if(search_query.query.isNotEmpty()) {
+             scheduleBackroundQuery(search_query.query.toString())
+         }
+    }
+
+    private fun scheduleBackroundQuery(lastQuery: String){
+        val intent = Intent(applicationContext, AlarmReceiver::class.java)
+        intent.putExtra("last_query", lastQuery)
+        val pendingIntent = PendingIntent.getBroadcast(this, AlarmReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val startTime = System.currentTimeMillis()
+        val alarm = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, startTime,
+            AlarmManager.INTERVAL_FIFTEEN_MINUTES, pendingIntent)
+    }
+
+    private fun cancelBackroundQuery(){
+        val intent = Intent(applicationContext, AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(this, AlarmReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val alarm = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarm.cancel(pendingIntent)
+    }
 
 
 
