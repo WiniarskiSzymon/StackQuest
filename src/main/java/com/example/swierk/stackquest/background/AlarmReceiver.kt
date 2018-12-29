@@ -11,11 +11,9 @@ class AlarmReceiver: BroadcastReceiver(){
     }
 
 
-    override fun onReceive(context: Context?, intent: Intent?) {
+    override fun onReceive(context: Context, intent: Intent) {
 
-        val i = Intent(context, GetLatestQueryService::class.java)
-        val lastQuery = intent?.extras?.get("last_query").toString()
-        i.putExtra("last_query",lastQuery)
-        context?.startService(i)
+    GetLatestQueryService.enqueueWork(context, intent)
+
     }
 }

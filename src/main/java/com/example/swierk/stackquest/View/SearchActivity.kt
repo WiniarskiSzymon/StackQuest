@@ -116,8 +116,8 @@ class SearchActivity : AppCompatActivity() {
 
     }
 
-     override fun onDestroy() {
-        super.onDestroy()
+     override fun onPause() {
+        super.onPause()
          if(search_query.query.isNotEmpty()) {
              scheduleBackroundQuery(search_query.query.toString())
          }
