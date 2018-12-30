@@ -52,6 +52,7 @@ class SearchActivity : AppCompatActivity() {
             if(search_query.query.isNotEmpty()) {
                 searchActivityViewModel.getQueryResults(search_query.query.toString())
             }
+            else swiperefresh.isRefreshing = false
         }
 
         viewManager = LinearLayoutManager(this)
