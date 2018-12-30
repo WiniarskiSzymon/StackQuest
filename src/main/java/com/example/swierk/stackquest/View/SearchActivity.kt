@@ -9,20 +9,20 @@ import android.content.Intent
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v7.recyclerview.R.attr.layoutManager
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import com.example.swierk.stackquest.*
 import com.example.swierk.stackquest.background.AlarmReceiver
-import com.example.swierk.stackquest.model.QueryResult
 import com.example.swierk.stackquest.model.Question
 import com.example.swierk.stackquest.model.Response
+import com.example.swierk.stackquest.viewModel.SearchActivityViewModel
+import com.example.swierk.stackquest.viewModel.SearchActivityViewModelFactory
 import com.jakewharton.rxbinding.widget.RxSearchView
 
 import dagger.android.AndroidInjection
 import rx.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.activity_search.*
-import java.util.Collections.addAll
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -46,7 +46,7 @@ class SearchActivity : AppCompatActivity() {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
-        cancelBackroundQuery()
+
 
         swiperefresh.setOnRefreshListener {
             if(search_query.query.isNotEmpty()) {
@@ -55,7 +55,9 @@ class SearchActivity : AppCompatActivity() {
         }
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = SearchListAdapter(questionList){question : Question ->  showQuestionDetails( question )}
+        viewAdapter = SearchListAdapter(questionList) { question: Question ->
+            showQuestionDetails(question)
+        }
         recyclerView = findViewById<RecyclerView>(R.id.search_list_recycler).apply {
             setHasFixedSize(true)
             layoutManager = viewManager
@@ -82,7 +84,7 @@ class SearchActivity : AppCompatActivity() {
                 Response.Status.ERROR -> {
                     swiperefresh.isRefreshing = false
                     updateAdapterWithData(it)
-                    it.errorMessage?.toast(this)
+                    showErrorAlert(it.errorMessage)
                 }
             }
         }
@@ -95,13 +97,43 @@ class SearchActivity : AppCompatActivity() {
             questionList.addAll(response.data.items)
             viewAdapter.notifyDataSetChanged()
         }
+    }
+
+    private fun showErrorAlert(errorMessage: String?) {
+        val alert = AlertDialog.Builder(this)
+
+        with(alert) {
+            setTitle(R.string.error_alert_title)
+            setMessage(R.string.error_alert_message)
+            setPositiveButton(R.string.error_alert_ok) { dialog, _ ->
+                dialog.dismiss()
+            }
+            setNegativeButton(R.string.error_alert_more_info) { dialog, _ ->
+                dialog.dismiss()
+                showDetailedErrorAlert(errorMessage)
+            }
         }
+        val dialog = alert.create()
+        dialog.show()
+    }
 
+    private fun showDetailedErrorAlert(errorMessage: String?) {
+        val alert = AlertDialog.Builder(this)
 
+        with(alert) {
+            setTitle(R.string.error_alert_title)
+            setMessage(errorMessage)
+            setPositiveButton(R.string.error_alert_ok) { dialog, _ ->
+                dialog.dismiss()
+            }
+        }
+        val dialog = alert.create()
+        dialog.show()
+    }
 
     private fun initSearchBar() {
         RxSearchView.queryTextChanges(search_query)
-            .debounce(1, TimeUnit.SECONDS)
+            .debounce(200, TimeUnit.MILLISECONDS)
             .skip(1)
             .filter { it.isNotEmpty() }
             .observeOn(AndroidSchedulers.mainThread())
@@ -109,15 +141,22 @@ class SearchActivity : AppCompatActivity() {
             .subscribe {
                 searchActivityViewModel.getQueryResults(it.toString())
             }
-        search_query.setOnSearchClickListener {
-            if(search_query.query.isNotEmpty()) {
-            searchActivityViewModel.getQueryResults(search_query.query.toString())
-        }}
-
     }
 
-     override fun onPause() {
-        super.onPause()
+    override fun onStart() {
+        super.onStart()
+        cancelBackroundQuery()
+    }
+
+    private fun cancelBackroundQuery(){
+        val intent = Intent(applicationContext, AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(this, AlarmReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val alarm = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarm.cancel(pendingIntent)
+    }
+
+     override fun onStop() {
+        super.onStop()
          if(search_query.query.isNotEmpty()) {
              scheduleBackroundQuery(search_query.query.toString())
          }
@@ -129,16 +168,11 @@ class SearchActivity : AppCompatActivity() {
         val pendingIntent = PendingIntent.getBroadcast(this, AlarmReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         val startTime = System.currentTimeMillis()
         val alarm = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intervalInMiliseconds = 2L*60*1000
         alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, startTime,
-            AlarmManager.INTERVAL_FIFTEEN_MINUTES, pendingIntent)
+            intervalInMiliseconds, pendingIntent)
     }
 
-    private fun cancelBackroundQuery(){
-        val intent = Intent(applicationContext, AlarmReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(this, AlarmReceiver.REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val alarm = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarm.cancel(pendingIntent)
-    }
 
 
 

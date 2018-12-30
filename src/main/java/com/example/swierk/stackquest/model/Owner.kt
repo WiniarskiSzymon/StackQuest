@@ -11,7 +11,7 @@ data class Owner(
     @Json(name = "display_name")
     val displayName: String,
     @Json(name = "link")
-    val link: String,
+    val link: String?,
     @Json(name = "profile_image")
     val profileImage: String = "https://www.gravatar.com/avatar/ec792abc8b563e84c2ba50aadbffb9fe?s=128&d=identicon&r=PG",
     @Json(name = "reputation")

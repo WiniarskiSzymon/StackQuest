@@ -1,7 +1,6 @@
 package com.example.swierk.stackquest.di
 
-import com.example.swierk.stackquest.SearchActivityViewModel
-import com.example.swierk.stackquest.SearchActivityViewModelFactory
+import com.example.swierk.stackquest.viewModel.SearchActivityViewModelFactory
 import com.example.swierk.stackquest.api.StackAPI
 import dagger.Module
 import dagger.Provides
@@ -13,6 +12,7 @@ abstract class SearchActivityModule{
     companion object {
         @JvmStatic
         @Provides
-        fun provideSearchActivityViewModelFactory(stackAPI: StackAPI) = SearchActivityViewModelFactory(stackAPI)
+        fun provideSearchActivityViewModelFactory(stackAPI: StackAPI) =
+            SearchActivityViewModelFactory(stackAPI)
     }
 }

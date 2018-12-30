@@ -1,4 +1,4 @@
-package com.example.swierk.stackquest
+package com.example.swierk.stackquest.viewModel
 
 import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider
