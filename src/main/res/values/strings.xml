@@ -3,9 +3,9 @@
     <string name="by_text">By:</string>
     <string name="counts_text">Answers:</string>
     <string name="error_alert_ok">OK</string>
-    <string name="error_alert_more_info">More information:</string>
-    <string name="error_alert_title">More information:</string>
-    <string name="error_alert_message">More information:</string>
+    <string name="error_alert_more_info">More information</string>
+    <string name="error_alert_title">Connection problem</string>
+    <string name="error_alert_message">Sorry there was a connection problem while trying to get your query.</string>
 
 
 

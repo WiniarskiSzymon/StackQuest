@@ -46,9 +46,15 @@ class GetLatestQueryService: JobIntentService() {
 
         val url = urlBuilder?.build().toString()
         val request = Request.Builder().url(url).build()
-        val response = client.newCall(request).execute()
-        val json = JSONObject(response.body()?.string())
-        val title = json.getJSONArray("items").getJSONObject(0).getString("title")
+
+        var title : String
+        try {
+            val response = client.newCall(request).execute()
+            val json = JSONObject(response.body()?.string())
+            title = json.getJSONArray("items").getJSONObject(0).getString("title")
+        }catch( e:Exception){
+            title = e.message ?: "Error during query"
+        }
 
        return title
     }
