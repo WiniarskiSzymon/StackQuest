@@ -3,6 +3,7 @@ package com.example.swierk.stackquest.di
 import android.app.Application
 import android.content.Context
 import com.example.swierk.stackquest.api.StackAPI
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -29,7 +30,7 @@ class AppModule() {
         .baseUrl("https://api.stackexchange.com/2.2/")
         .client(logger)
         .addConverterFactory(MoshiConverterFactory.create())
-        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+        .addCallAdapterFactory(CoroutineCallAdapterFactory())
         .build()
 
 
