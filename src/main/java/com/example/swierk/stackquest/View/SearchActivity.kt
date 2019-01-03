@@ -3,7 +3,7 @@ package com.example.swierk.stackquest.View
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
+
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -17,24 +17,16 @@ import com.example.swierk.stackquest.background.AlarmReceiver
 import com.example.swierk.stackquest.model.Question
 import com.example.swierk.stackquest.model.Response
 import com.example.swierk.stackquest.viewModel.SearchActivityViewModel
-import com.example.swierk.stackquest.viewModel.SearchActivityViewModelFactory
 import com.jakewharton.rxbinding.widget.RxSearchView
-
-import dagger.android.AndroidInjection
 import rx.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.activity_search.*
+import org.koin.android.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
+
 
 class SearchActivity : AppCompatActivity() {
 
-    @Inject
-    lateinit var searchViewModelFactory: SearchActivityViewModelFactory
-
-    private val searchActivityViewModel by lazy {
-        ViewModelProviders.of(this, searchViewModelFactory)
-            .get(SearchActivityViewModel::class.java)
-    }
+    private val searchActivityViewModel : SearchActivityViewModel by viewModel()
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
@@ -43,7 +35,6 @@ class SearchActivity : AppCompatActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 

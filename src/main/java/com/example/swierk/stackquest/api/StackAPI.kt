@@ -1,12 +1,11 @@
 package com.example.swierk.stackquest.api
 
 import com.example.swierk.stackquest.model.QueryResult
-import io.reactivex.Single
 import kotlinx.coroutines.Deferred
 import retrofit2.Retrofit
-import javax.inject.Inject
 
-class StackAPI @Inject constructor(private val retrofit: Retrofit){
+
+class StackAPI (val retrofit: Retrofit){
 
 
     fun getQueryResults(query: String): Deferred<QueryResult> {
