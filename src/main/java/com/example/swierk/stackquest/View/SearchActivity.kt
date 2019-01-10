@@ -30,14 +30,12 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
-    private lateinit var viewManager: RecyclerView.LayoutManager
     private var questionList: MutableList<Question> = mutableListOf()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
-
 
         swiperefresh.setOnRefreshListener {
             if(search_query.query.isNotEmpty()) {
@@ -46,7 +44,7 @@ class SearchActivity : AppCompatActivity() {
             else swiperefresh.isRefreshing = false
         }
 
-        viewManager = LinearLayoutManager(this)
+        val viewManager = LinearLayoutManager(this)
         viewAdapter = SearchListAdapter(questionList) { question: Question ->
             showQuestionDetails(question)
         }
@@ -54,6 +52,10 @@ class SearchActivity : AppCompatActivity() {
             setHasFixedSize(true)
             layoutManager = viewManager
             adapter = viewAdapter
+            addOnScrollListener(
+                EndlessScrollListener(
+                    {page : Int ->searchActivityViewModel.getMoreForQuery(search_query.query.toString(), page)}
+                    ,viewManager))
         }
         observeSearchResponseLiveData()
         initSearchBar()
@@ -75,18 +77,16 @@ class SearchActivity : AppCompatActivity() {
                 Response.Status.LOADING ->swiperefresh.isRefreshing = true
                 Response.Status.ERROR -> {
                     swiperefresh.isRefreshing = false
-                    updateAdapterWithData(it)
                     showErrorAlert(it.errorMessage)
                 }
             }
-        }
-        )
+        })
     }
 
     private fun updateAdapterWithData(response: Response){
         if (response.data != null) {
             questionList.clear()
-            questionList.addAll(response.data.items)
+            questionList.addAll(response.data)
             viewAdapter.notifyDataSetChanged()
         }
     }
@@ -131,7 +131,9 @@ class SearchActivity : AppCompatActivity() {
             .observeOn(AndroidSchedulers.mainThread())
             .distinctUntilChanged()
             .subscribe {
+                recyclerView.layoutManager?.scrollToPosition(0)
                 searchActivityViewModel.getQueryResults(it.toString())
+
             }
     }
 

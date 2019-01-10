@@ -8,8 +8,8 @@ import retrofit2.Retrofit
 class StackAPI (val retrofit: Retrofit){
 
 
-    fun getQueryResults(query: String): Deferred<QueryResult> {
+    fun getQueryResults(query: String, page: Int): Deferred<QueryResult> {
         val searchService = retrofit.create(SearchService::class.java)
-        return searchService.getQueryResults(query)
+        return searchService.getQueryResults(query, page = page)
     }
 }
