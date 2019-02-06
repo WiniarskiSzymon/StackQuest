@@ -14,8 +14,10 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import com.example.swierk.stackquest.*
 import com.example.swierk.stackquest.background.AlarmReceiver
+import com.example.swierk.stackquest.model.QueryResult
 import com.example.swierk.stackquest.model.Question
 import com.example.swierk.stackquest.model.Response
+import com.example.swierk.stackquest.model.Status
 import com.example.swierk.stackquest.viewModel.SearchActivityViewModel
 import com.example.swierk.stackquest.viewModel.SearchActivityViewModelFactory
 import com.jakewharton.rxbinding.widget.RxSearchView
@@ -64,7 +66,9 @@ class SearchActivity : AppCompatActivity() {
             layoutManager = viewManager
             adapter = viewAdapter
         }
-        observeSearchResponseLiveData()
+
+        observeResponseStatus()
+        observeResponseData()
         initSearchBar()
     }
 
@@ -74,17 +78,15 @@ class SearchActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    private fun observeSearchResponseLiveData() {
-        searchActivityViewModel.searchResponse.observe(this, Observer<Response> {
+    private fun observeResponseStatus() {
+        searchActivityViewModel.responSestatus.observe(this, Observer<Response> {
             when (it?.status) {
-                Response.Status.SUCCESS -> {
-                    updateAdapterWithData(it)
+                Status.SUCCESS -> {
                     swiperefresh.isRefreshing = false
                 }
-                Response.Status.LOADING ->swiperefresh.isRefreshing = true
-                Response.Status.ERROR -> {
+                Status.LOADING ->swiperefresh.isRefreshing = true
+                Status.ERROR -> {
                     swiperefresh.isRefreshing = false
-                    updateAdapterWithData(it)
                     showErrorAlert(it.errorMessage)
                 }
             }
@@ -92,12 +94,19 @@ class SearchActivity : AppCompatActivity() {
         )
     }
 
-    private fun updateAdapterWithData(response: Response){
-        if (response.data != null) {
-            questionList.clear()
-            questionList.addAll(response.data.items)
-            viewAdapter.notifyDataSetChanged()
+    private fun observeResponseData() {
+        searchActivityViewModel.responseData.observe(this, Observer<QueryResult> {
+            if (it != null) {
+                updateAdapterWithData(it)
+                }
+            })
         }
+
+    private fun updateAdapterWithData(queryResult: QueryResult){
+            questionList.clear()
+            questionList.addAll(queryResult.items)
+            viewAdapter.notifyDataSetChanged()
+
     }
 
     private fun showErrorAlert(errorMessage: String?) {
@@ -134,7 +143,7 @@ class SearchActivity : AppCompatActivity() {
 
     private fun initSearchBar() {
         RxSearchView.queryTextChanges(search_query)
-            .debounce(200, TimeUnit.MILLISECONDS)
+            .debounce(400, TimeUnit.MILLISECONDS)
             .skip(1)
             .filter { it.isNotEmpty() }
             .observeOn(AndroidSchedulers.mainThread())

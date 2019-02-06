@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModel
 import com.example.swierk.stackquest.api.StackAPI
 import com.example.swierk.stackquest.model.QueryResult
 import com.example.swierk.stackquest.model.Response
+import com.example.swierk.stackquest.model.Status
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -18,23 +19,23 @@ class SearchActivityViewModel @Inject constructor(private val stackAPI: StackAPI
     private lateinit var disposable: Disposable
 
 
-    var searchResponse: MutableLiveData<Response> = MutableLiveData()
-    private var cachedQueryResult : QueryResult? = null
+    var responseData: MutableLiveData<QueryResult> = MutableLiveData()
+    var responSestatus : MutableLiveData<Response> = MutableLiveData()
+
 
 
      fun getQueryResults(query : String){
         disposable = stackAPI.getQueryResults(query)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe {searchResponse.value=(Response.loading())  }
+            .doOnSubscribe {responSestatus.value=(Response(Status.LOADING))  }
             .subscribe(
                 {
-                    searchResponse.value=(Response.success(it))
-                    cachedQueryResult = it
+                    responSestatus.value = Response(Status.SUCCESS)
+                    responseData.value = it
                 },
                 {
-                    searchResponse.value=(Response.error(it.message ))
-                    searchResponse.value=(Response.success(cachedQueryResult))
+                    responSestatus.value=(Response(Status.ERROR, it.message))
                 }
 
             )
