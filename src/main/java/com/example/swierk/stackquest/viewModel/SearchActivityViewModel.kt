@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import com.example.swierk.stackquest.api.StackAPI
 import com.example.swierk.stackquest.model.QueryResult
+import com.example.swierk.stackquest.model.Question
 import com.example.swierk.stackquest.model.Response
 import com.example.swierk.stackquest.model.Status
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -19,20 +20,21 @@ class SearchActivityViewModel @Inject constructor(private val stackAPI: StackAPI
     private lateinit var disposable: Disposable
 
 
-    var responseData: MutableLiveData<QueryResult> = MutableLiveData()
+    var responseData: MutableLiveData<List<Question>> = MutableLiveData()
     var responSestatus : MutableLiveData<Response> = MutableLiveData()
+    private var visibleQueryAnswers : MutableList<Question>? = mutableListOf()
 
 
-
-     fun getQueryResults(query : String){
-        disposable = stackAPI.getQueryResults(query)
+     fun getQueryResults(query : String, pageOfResults: Int=1){
+        disposable = stackAPI.getQueryResults(query, pageOfResults)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe {responSestatus.value=(Response(Status.LOADING))  }
             .subscribe(
                 {
                     responSestatus.value = Response(Status.SUCCESS)
-                    responseData.value = it
+                    visibleQueryAnswers?.addAll(it.items)
+                    responseData.value = visibleQueryAnswers
                 },
                 {
                     responSestatus.value=(Response(Status.ERROR, it.message))
@@ -44,7 +46,9 @@ class SearchActivityViewModel @Inject constructor(private val stackAPI: StackAPI
 
     override fun onCleared() {
         super.onCleared()
-        disposable.dispose()
+        if(::disposable.isInitialized){
+            disposable.dispose()
+        }
     }
 
 }

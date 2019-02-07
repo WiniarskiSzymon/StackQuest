@@ -8,8 +8,8 @@ import javax.inject.Inject
 class StackAPI @Inject constructor(private val retrofit: Retrofit){
 
 
-    fun getQueryResults(query: String): Single<QueryResult> {
+    fun getQueryResults(query: String, pageNumber : Int): Single<QueryResult> {
         val searchService = retrofit.create(SearchService::class.java)
-        return searchService.getQueryResults(query)
+        return searchService.getQueryResults(query, pageNumber = pageNumber)
     }
 }

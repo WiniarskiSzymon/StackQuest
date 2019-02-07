@@ -40,7 +40,7 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
-    private lateinit var viewManager: RecyclerView.LayoutManager
+
     private var questionList: MutableList<Question> = mutableListOf()
 
 
@@ -57,7 +57,7 @@ class SearchActivity : AppCompatActivity() {
             else swiperefresh.isRefreshing = false
         }
 
-        viewManager = LinearLayoutManager(this)
+        val viewManager = LinearLayoutManager(this)
         viewAdapter = SearchListAdapter(questionList) { question: Question ->
             showQuestionDetails(question)
         }
@@ -65,6 +65,10 @@ class SearchActivity : AppCompatActivity() {
             setHasFixedSize(true)
             layoutManager = viewManager
             adapter = viewAdapter
+            addOnScrollListener(
+                EndlessScrollListener(
+                    {pageNumber : Int ->searchActivityViewModel.getQueryResults(search_query.query.toString(), pageNumber)}
+                    ,viewManager))
         }
 
         observeResponseStatus()
@@ -95,16 +99,16 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun observeResponseData() {
-        searchActivityViewModel.responseData.observe(this, Observer<QueryResult> {
+        searchActivityViewModel.responseData.observe(this, Observer<List<Question>> {
             if (it != null) {
                 updateAdapterWithData(it)
                 }
             })
         }
 
-    private fun updateAdapterWithData(queryResult: QueryResult){
+    private fun updateAdapterWithData(queryResult: List<Question>){
             questionList.clear()
-            questionList.addAll(queryResult.items)
+            questionList.addAll(queryResult)
             viewAdapter.notifyDataSetChanged()
 
     }

@@ -10,6 +10,7 @@ interface SearchService{
     @GET("search")
     fun getQueryResults(
         @Query("intitle") query :String,
-        @Query("site") siteName :String ="stackoverflow"
+        @Query("site") siteName :String ="stackoverflow",
+        @Query("page") pageNumber : Int
     ): Single<QueryResult>
 }

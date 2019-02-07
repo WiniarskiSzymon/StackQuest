@@ -65,7 +65,7 @@ class StackAPITest{
 
     fun getQueryResultTest(){
         mockServer.enqueue(getQueryResultMock)
-        stackAPI.getQueryResults("query").subscribe(QueryResultSubscriber)
+        stackAPI.getQueryResults("query", pageNumber = 1).subscribe(QueryResultSubscriber)
 
         val queryResult = adapter.fromJson(queryJSON)
         QueryResultSubscriber.assertNoErrors()
