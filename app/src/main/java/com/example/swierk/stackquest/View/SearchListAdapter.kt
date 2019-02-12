@@ -24,11 +24,13 @@ class SearchListAdapter(val items: List<Question>,private val clickListener: (Qu
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.updateWithUrl(items[position].owner.profileImage)
-        holder.answerCount.text = items[position].answerCount.toString()
-        holder.title.text = items[position].title
-        holder.userName.text = items[position].owner.displayName
-        holder.itemView.setOnClickListener{clickListener(items[position])}
+        holder.apply {
+            updateWithUrl(items[position].owner.profileImage)
+            answerCount.text = items[position].answerCount.toString()
+            title.text = items[position].title
+            userName.text = items[position].owner.displayName
+            itemView.setOnClickListener { clickListener(items[position]) }
+        }
 
     }
 
@@ -43,6 +45,7 @@ class SearchListAdapter(val items: List<Question>,private val clickListener: (Qu
         val answerCount = view.counts_amount
         val title = view.title
         val userName = view.user_name
+
         fun updateWithUrl(url: String) {
             Picasso.get().load(url).into(userAvatar)
         }
